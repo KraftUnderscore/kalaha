@@ -8,7 +8,7 @@ class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 
   var playerOneTurn = true
   val gameState : Array[Int] = Array.ofDim(GameManager.GameStateSize)
   val r: Random.type = Random
-  var isPlaying : Boolean = true
+  var turnCounter : Int = 0
 
   def resetGame():Unit = {
     for(x<-0 until GameManager.GameStateSize)
@@ -18,8 +18,8 @@ class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 
 
   def callPlayerMove():Unit = {
     interface.displayGameBoard(playerOneTurn, gameState)
-    if(playerOneTurn) player1 ! Player.Move(gameState)
-    else player2 ! Player.Move(gameState)
+    if(playerOneTurn) player1 ! Player.Move(playerOneTurn, gameState)
+    else player2 ! Player.Move(playerOneTurn, gameState)
   }
 
   def startGame():Unit = {
@@ -53,7 +53,6 @@ class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 
     if(checkIfLost) {
       playerOneTurn = gameState(GameManager.PlayerOneBase) > gameState(GameManager.PlayerTwoBase)
       interface.displayWinner(playerOneTurn)
-      isPlaying = false
     }else {
       if(playerOneTurn) {
         if(_index+valueAtIndex > GameManager.PlayerOneBase) playerOneTurn = false

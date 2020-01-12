@@ -58,11 +58,15 @@ class TextGUI extends Interface {
   override def humanPrompt: Int = {
     print("Wybierz dolek: ")
     val input = scala.io.StdIn.readInt()
-    if(input<1 || input>6){
+    if(input>=1 || input<=6){
+      input
+    }else{
       println("Nie ma takiego dolka!")
       humanPrompt
-    }else{
-      input
     }
+  }
+
+  override def AIPrompt(choice: Int): Unit = {
+    println(s"Wybieram dolek: $choice")
   }
 }

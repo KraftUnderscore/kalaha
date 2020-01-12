@@ -5,4 +5,5 @@ trait Interface {
   def displayGameBoard(plr : Boolean, gameState : Array[Int])
   def displayWinner(plr : Boolean)
   def humanPrompt : Int
+  def AIPrompt(choice : Int)
 }

@@ -1,5 +1,5 @@
 package Game
 
 trait Controls {
-  def makeMove(gameState : Array[Int]) : Int
+  def makeMove(plr : Boolean, gameState : Array[Int]) : Int
 }

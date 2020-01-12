@@ -3,14 +3,14 @@ package Game
 import akka.actor.Actor
 
 class Player(controls : Controls) extends Actor{
-  def nextMove(gameState : Array[Int]):Int = {
-    controls.makeMove(gameState)
+  def nextMove(plr:Boolean, gameState : Array[Int]):Int = {
+    controls.makeMove(plr, gameState)
   }
   override def receive: Receive = {
-    case Player.Move(gameState) => sender ! GameManager.RegisterMove(nextMove(gameState))
+    case Player.Move(plr, gameState) => sender ! GameManager.RegisterMove(nextMove(plr,gameState))
   }
 }
 
 object Player{
-  case class Move(gameState : Array[Int])
+  case class Move(plr : Boolean, gameState : Array[Int])
 }
