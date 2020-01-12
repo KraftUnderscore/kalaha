@@ -7,7 +7,7 @@ import scala.util.Random
 class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 : ActorRef, val interface: Interface) extends Actor{
   var playerOneTurn = true
   val gameState : Array[Int] = Array.ofDim(GameManager.GameStateSize)
-  val r  = Random
+  val r: Random.type = Random
   var isPlaying : Boolean = true
 
   def resetGame():Unit = {
@@ -17,13 +17,14 @@ class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 
   }
 
   def callPlayerMove():Unit = {
+    interface.displayGameBoard(playerOneTurn, gameState)
     if(playerOneTurn) player1 ! Player.Move(gameState)
     else player2 ! Player.Move(gameState)
   }
 
   def startGame():Unit = {
     resetGame()
-    val nextPlr = r.nextInt()
+    val nextPlr = 0
     if(nextPlr == 0) playerOneTurn = true
     else playerOneTurn = false
     interface.displayStartingPlayer(playerOneTurn)
@@ -41,23 +42,25 @@ class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 
   }
 
   def registerPlayerMove(index : Int) : Unit ={
-    val valueAtIndex = gameState(index)
-    gameState(index) = 0
+    var _index = index
+    if(!playerOneTurn) _index = index + GameManager.PlayerOneBase + 1
+    val valueAtIndex = gameState(_index)
+    gameState(_index) = 0
 
     for(x<- 1 to valueAtIndex)
-      gameState((x+valueAtIndex)%GameManager.GameStateSize) += 1
+      gameState((x+_index)%GameManager.GameStateSize) += 1
 
     if(checkIfLost) {
-      interface.displayWinner(!playerOneTurn)
+      playerOneTurn = gameState(GameManager.PlayerOneBase) > gameState(GameManager.PlayerTwoBase)
+      interface.displayWinner(playerOneTurn)
       isPlaying = false
     }else {
       if(playerOneTurn) {
-        if(index+valueAtIndex > GameManager.PlayerOneBase) playerOneTurn = false
+        if(_index+valueAtIndex > GameManager.PlayerOneBase) playerOneTurn = false
       }else{
-        if(index+valueAtIndex > GameManager.PlayerTwoBase) playerOneTurn = true
+        if(_index+valueAtIndex > GameManager.PlayerTwoBase) playerOneTurn = true
       }
 
-      interface.displayGameBoard(playerOneTurn, gameState)
       callPlayerMove()
     }
   }

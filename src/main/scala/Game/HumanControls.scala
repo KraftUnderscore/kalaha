@@ -1,9 +1,8 @@
 package Game
 
-import scala.util.Random
-
-class HumanControls extends Controls {
+class HumanControls(interface: Interface) extends Controls {
   override def makeMove(gameState: Array[Int]): Int = {
-    Random.nextInt(6)
+    val input = interface.humanPrompt-1
+    input
   }
 }
