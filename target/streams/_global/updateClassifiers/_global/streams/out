@@ -1,3 +1,4 @@
-[debug] "not up to date. inChanged = true, force = false
+[warn] config-1.3.3-sources.jar no longer exists at C:\Users\spiet\AppData\Local\Coursier\cache\v1\https\repo1.maven.org\maven2\com\typesafe\config\1.3.3\config-1.3.3-sources.jar
+[debug] "not up to date. inChanged = false, force = false
 [debug] Updating ProjectRef(uri("file:/D:/Programowanie/Scala/kalaha/"), "kalaha")...
 [debug] Done updating ProjectRef(uri("file:/D:/Programowanie/Scala/kalaha/"), "kalaha")

@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef}
 
 import scala.util.Random
 
-class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 : ActorRef, val interface: Interface) extends Actor{
+class GameManager(val player1 : ActorRef, val player2 : ActorRef) extends Actor{
   var playerOneTurn = true
   val gameState : Array[Int] = Array.ofDim(GameManager.GameStateSize)
   val r: Random.type = Random
@@ -12,12 +12,12 @@ class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 
 
   def resetGame():Unit = {
     for(x<-0 until GameManager.GameStateSize)
-      if(x!=GameManager.PlayerOneBase || x!=GameManager.PlayerTwoBase) gameState(x) = startingValues
+      if(x!=GameManager.PlayerOneBase || x!=GameManager.PlayerTwoBase) gameState(x) = GameManager.StartingValues
       else gameState(x) = 0
   }
 
   def callPlayerMove():Unit = {
-    interface.displayGameBoard(playerOneTurn, gameState)
+    GameManager.Interface.displayGameBoard(playerOneTurn, gameState)
     if(playerOneTurn) player1 ! Player.Move(playerOneTurn, gameState)
     else player2 ! Player.Move(playerOneTurn, gameState)
   }
@@ -27,7 +27,7 @@ class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 
     val nextPlr = 0
     if(nextPlr == 0) playerOneTurn = true
     else playerOneTurn = false
-    interface.displayStartingPlayer(playerOneTurn)
+    GameManager.Interface.displayStartingPlayer(playerOneTurn)
     callPlayerMove()
   }
 
@@ -52,7 +52,7 @@ class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 
 
     if(checkIfLost) {
       playerOneTurn = gameState(GameManager.PlayerOneBase) > gameState(GameManager.PlayerTwoBase)
-      interface.displayWinner(playerOneTurn)
+      GameManager.Interface.displayWinner(playerOneTurn)
     }else {
       if(playerOneTurn) {
         if(_index+valueAtIndex > GameManager.PlayerOneBase) playerOneTurn = false
@@ -73,7 +73,9 @@ class GameManager(val startingValues : Int, val player1 : ActorRef, val player2 
 object GameManager{
   case object Start
   case class RegisterMove(move : Int)
+  val StartingValues = 5
   val GameStateSize = 14
   val PlayerOneBase = 6
   val PlayerTwoBase = 13
+  val Interface : Interface = new TextGUI
 }

@@ -1,8 +1,8 @@
 package Game
 
-class HumanControls(interface: Interface) extends Controls {
+class HumanControls extends Controls {
   override def makeMove(plr : Boolean, gameState: Array[Int]): Int = {
-    val input = interface.humanPrompt-1
+    val input = GameManager.Interface.humanPrompt-1
     input
   }
 }
