@@ -12,7 +12,7 @@ class GameManager(val player1 : ActorRef, val player2 : ActorRef) extends Actor{
 
   def resetGame():Unit = {
     for(x<-0 until GameManager.GameStateSize)
-      if(x!=GameManager.PlayerOneBase || x!=GameManager.PlayerTwoBase) gameState(x) = GameManager.StartingValues
+      if(x!=GameManager.PlayerOneBase && x!=GameManager.PlayerTwoBase) gameState(x) = GameManager.StartingValues
       else gameState(x) = 0
   }
 
@@ -24,7 +24,7 @@ class GameManager(val player1 : ActorRef, val player2 : ActorRef) extends Actor{
 
   def startGame():Unit = {
     resetGame()
-    val nextPlr = 0
+    val nextPlr = Random.nextInt(2)
     if(nextPlr == 0) playerOneTurn = true
     else playerOneTurn = false
     GameManager.Interface.displayStartingPlayer(playerOneTurn)
@@ -53,6 +53,7 @@ class GameManager(val player1 : ActorRef, val player2 : ActorRef) extends Actor{
     if(checkIfLost) {
       playerOneTurn = gameState(GameManager.PlayerOneBase) > gameState(GameManager.PlayerTwoBase)
       GameManager.Interface.displayWinner(playerOneTurn)
+      context.system.terminate()
     }else {
       if(playerOneTurn) {
         if(_index+valueAtIndex > GameManager.PlayerOneBase) playerOneTurn = false
