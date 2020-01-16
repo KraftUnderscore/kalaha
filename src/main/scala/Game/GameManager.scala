@@ -50,7 +50,7 @@ class GameManager(val player1 : ActorRef, val player2 : ActorRef) extends Actor{
     if(!playerOneTurn) _index = index + GameManager.PlayerOneBase + 1 //jezeli gracz 2 to zmieniamy przedzial z 0-5 na 7-12
     val valueAtIndex = gameState(_index) //ilosc kuleczek w dolku => ile musimy sie przesunac do przodu, dodajac po 1 do dolkow
     gameState(_index) = 0 //zabieramy wszystkie kulki z dolka
-    //dodajemy po 1 kuleczce na kazdym miejscu po prawej do wartosci valueAtIndex
+    //dodajemy po 1 kuleczce na kazdym miejscu po prawej, do wartosci valueAtIndex
     for(x<- 1 to valueAtIndex)
       gameState((x+_index)%GameManager.GameStateSize) += 1
     //sprawdzamy, czy gra sie nie konczy
@@ -75,10 +75,16 @@ class GameManager(val player1 : ActorRef, val player2 : ActorRef) extends Actor{
       //sprawdzamy, czy kulka wyladowala na polu gracza, ktorego teraz jest tura => gra jeszcze raz, moze zabiera kulki przeciwnika
       if(playerOneTurn) {
         if(_index+valueAtIndex > GameManager.PlayerOneBase) playerOneTurn = false //sprawdzenie czy jego tura
-        //if(gameState((valueAtIndex+_index)%GameManager.GameStateSize) == 1)??? //TODO: ZABRAC Z DOLKA PRZECIWNIKA
+        if(gameState((valueAtIndex+_index)%GameManager.GameStateSize) == 1){
+          val toSteal = gameState(GameManager.PlayerOneBase + 1 + (GameManager.PlayerOneBase - index))
+          println("ELO ELO ELO UKRADNIJ "+toSteal)
+        } //TODO: ZABRAC Z DOLKA PRZECIWNIKA
       }else{
         if(_index+valueAtIndex > GameManager.PlayerTwoBase) playerOneTurn = true
-        //if(gameState((valueAtIndex+_index)%GameManager.GameStateSize) == 1)??? //TODO: ZABRAC Z DOLKA PRZECIWNIKA
+        if(gameState((valueAtIndex+_index)%GameManager.GameStateSize) == 1) {
+          val toSteal = gameState(GameManager.PlayerOneBase - 1 - (GameManager.PlayerOneBase - _index))
+          println("ELO ELO ELO UKRADNIJ " + toSteal)
+        }
       }
 
       callPlayerMove()
