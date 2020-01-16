@@ -69,4 +69,9 @@ class TextGUI extends Interface {
   override def AIPrompt(choice: Int): Unit = {
     println(s"Wybieram dolek: $choice")
   }
+
+  def displaySteal(plr: Boolean, index: Int): Unit = {
+    if(plr)println(s"----------------------Gracz 1 kradnie graczowi 2 kulki z pola $index!")
+    else println(s"-----------------------Gracz 2 kradnie graczowi 1 kulki z pola $index!")
+  }
 }

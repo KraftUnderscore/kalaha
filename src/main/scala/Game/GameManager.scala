@@ -44,6 +44,25 @@ class GameManager(val player1 : ActorRef, val player2 : ActorRef) extends Actor{
     else false
   }
 
+  def endGame:Unit = {
+    //sumujemy do bazy graczy wszystkie dolki - gracz 1
+    for(x<-0 until GameManager.PlayerOneBase) {
+      gameState(GameManager.PlayerOneBase) += gameState(x)
+      gameState(x) = 0
+    }
+    // --||-- gracz 2
+    for(x<-GameManager.PlayerOneBase+1 until GameManager.PlayerTwoBase) {
+      gameState(GameManager.PlayerTwoBase) += gameState(x)
+      gameState(x) = 0
+    }
+    //wyswietlamy ostateczny wynik planszy i wybieramy wygranego
+    GameManager.Interface.displayGameBoard(playerOneTurn, gameState)
+    playerOneTurn = gameState(GameManager.PlayerOneBase) > gameState(GameManager.PlayerTwoBase)
+    //ogloszenie wyniku, zamkniecie systemu aktorow
+    GameManager.Interface.displayWinner(playerOneTurn)
+    context.system.terminate()
+  }
+
   //zarejestrowanie ruchu wykonanego przez gracza (komunikat od niego)
   def registerPlayerMove(index : Int) : Unit ={
     var _index = index
@@ -55,35 +74,43 @@ class GameManager(val player1 : ActorRef, val player2 : ActorRef) extends Actor{
       gameState((x+_index)%GameManager.GameStateSize) += 1
     //sprawdzamy, czy gra sie nie konczy
     if(checkIfLost) {
-      //sumujemy do bazy graczy wszystkie dolki - gracz 1
-      for(x<-0 until GameManager.PlayerOneBase) {
-        gameState(GameManager.PlayerOneBase) += gameState(x)
-        gameState(x) = 0
-      }
-      // --||-- gracz 2
-      for(x<-GameManager.PlayerOneBase+1 until GameManager.PlayerTwoBase) {
-        gameState(GameManager.PlayerTwoBase) += gameState(x)
-        gameState(x) = 0
-      }
-      //wyswietlamy ostateczny wynik planszy i wybieramy wygranego
-      GameManager.Interface.displayGameBoard(playerOneTurn, gameState)
-      playerOneTurn = gameState(GameManager.PlayerOneBase) > gameState(GameManager.PlayerTwoBase)
-      //ogloszenie wyniku, zamkniecie systemu aktorow
-      GameManager.Interface.displayWinner(playerOneTurn)
-      context.system.terminate()
+      endGame
     }else {
-      //sprawdzamy, czy kulka wyladowala na polu gracza, ktorego teraz jest tura => gra jeszcze raz, moze zabiera kulki przeciwnika
+      val finalIndex = _index+valueAtIndex;
       if(playerOneTurn) {
-        if(_index+valueAtIndex > GameManager.PlayerOneBase) playerOneTurn = false //sprawdzenie czy jego tura
-        if(gameState((valueAtIndex+_index)%GameManager.GameStateSize) == 1){
-          val toSteal = gameState(GameManager.PlayerOneBase + 1 + (GameManager.PlayerOneBase - index))
-          println("ELO ELO ELO UKRADNIJ "+toSteal)
-        } //TODO: ZABRAC Z DOLKA PRZECIWNIKA
+        //sprawdzamy, czy ostatnia kulka skonczyla na polach gracza
+        if(finalIndex%13 < GameManager.PlayerOneBase){
+          playerOneTurn = true
+          //sprawdzamy, czy zrobila okrazenie
+          if(finalIndex>GameManager.PlayerTwoBase){
+            val i = finalIndex % GameManager.GameStateSize
+            //sprawdzamy, czy pole, na ktorym skonczyla bylo puste (== teraz znajduje sie tam 1)
+            if(gameState(i)==1){
+              val stealIndex = GameManager.PlayerTwoBase - i - 1//index na planszy przeciwnika, z którego kradniemy pionki
+              gameState(GameManager.PlayerOneBase) += gameState(stealIndex)
+              gameState(stealIndex) = 0
+              GameManager.Interface.displaySteal(playerOneTurn, stealIndex%6 +1)
+            }
+          }
+        }
+        else{
+          playerOneTurn = false;
+        }
       }else{
-        if(_index+valueAtIndex > GameManager.PlayerTwoBase) playerOneTurn = true
-        if(gameState((valueAtIndex+_index)%GameManager.GameStateSize) == 1) {
-          val toSteal = gameState(GameManager.PlayerOneBase - 1 - (GameManager.PlayerOneBase - _index))
-          println("ELO ELO ELO UKRADNIJ " + toSteal)
+        if(finalIndex%13 > GameManager.PlayerOneBase){
+          playerOneTurn = false
+          if(finalIndex>(GameManager.PlayerTwoBase+GameManager.PlayerOneBase)) {
+            val i = finalIndex % GameManager.GameStateSize
+            if (gameState(i) == 1) {
+              val stealIndex = GameManager.PlayerTwoBase - i - 1
+              gameState(GameManager.PlayerTwoBase) += gameState(stealIndex)
+              gameState(stealIndex) = 0
+              GameManager.Interface.displaySteal(playerOneTurn, stealIndex+1)
+            }
+          }
+        }
+        else{
+          playerOneTurn = true;
         }
       }
 
