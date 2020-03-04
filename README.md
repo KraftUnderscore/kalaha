@@ -1,1 +1,2 @@
 # kalaha
+Simulation of kalaha game in Scala created using Actors as independent players and a server. You can replace the default interaface by creating a new class mixed with <i>Interface</i> trait and assigning it in object in GameManager.scala. You can create new control methods for players as well as AI by creating a new class mixed with <i>Controls</i> trait and assigning it to players in the main object (MainObj.scala).
